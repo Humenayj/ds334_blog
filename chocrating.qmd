@@ -1,0 +1,128 @@
+---
+title: "Blog Post 1"
+authors: "JJ Humenay"
+date: "2026-02-06"
+categories: [news, code, analysis]
+---
+
+```{r}
+#| message: false
+#| warning: false
+library(tidyverse)
+library(ggplot2)
+library(readr)
+library(stringr)
+library(lubridate)
+library(dplyr)
+```
+
+**Loading data:**
+
+```{r}
+#| message: false
+#| warning: false
+tuesdata <- tidytuesdayR::tt_load('2022-01-18')
+tuesdata <- tidytuesdayR::tt_load(2022, week = 3)
+```
+
+```{r}
+chocolate <- tuesdata$chocolate
+```
+
+**Introduction:**
+
+This analysis uses the the "Chocolate Ratings" dataset from Flavors of Cacao by Georgios and Kelsey. The dataset contains expert evaluations of chocolate bars produced by manufacturers around the world along with information about where the chocolate is made and where the cocoa beans originate.
+
+Each observation in this dataset represents a single chocolate bar review. The dataset includes 2,530 observations across 10 variables. Key variables include:
+
+rating: Expert rating of the chocolate bar on a 1-5 scale.
+
+company_location: Geographic region where the manufacturer is located.
+
+country_of_bean_origin: Country from which the cocoa beans were sourced.
+
+company_manufacturer: Name of the manufacturer
+
+Question of Interest: What aspects of a chocolate company seem to matter most for average ratings?
+
+The data originates from Flavors of Cacao and was accessed via the TidyTuesday project: https://github.com/rfordatascience/tidytuesday/blob/main/data/2022/2022-01-18/readme.md
+
+**Graph #1**
+
+Here we can investigate to see if the manufacturing company location has an effect on the rating of the chocolate. We are using filter to include company locations with more than 10 reviews.
+
+Which country manufactures the best chocolate on average ?
+
+```{r}
+chocolate_avg <- chocolate |>
+  group_by(company_location) |>
+  filter(n() > 10) |>
+  summarise(avg_rating = mean(rating)) 
+```
+
+```{r}
+ggplot(chocolate_avg, aes(x = reorder(company_location, avg_rating), y = avg_rating, fill = avg_rating)) +
+  geom_col() +  
+  scale_fill_viridis_c(name= "Average Rating") +
+  coord_flip() +         
+  theme_minimal() +
+  labs(x = "Company Location", 
+       y = "Rating",
+       title = "Average Chocolate Rating by Company Location")
+```
+
+We can see that average chocolate ratings vary slightly by company location with Vietnam ,Australia and several European countries showing higher ratings. However, the narrow spread in averages suggests that chocolate quality may be more influenced by other factors.
+
+**Graph #2**
+
+Now, Which country's cocoa beans produce the best chocolate on average ?
+
+```{r}
+ beanchocavg <- chocolate |>
+  group_by(country_of_bean_origin) |>
+  filter(n() > 10) |>
+  mutate(avg_rating = mean(rating)) 
+```
+
+```{r}
+ggplot(beanchocavg) +
+  geom_boxplot( aes(x = reorder(country_of_bean_origin, avg_rating), y = rating, fill = avg_rating)) + 
+  scale_fill_distiller(name= "Average Rating", palette = "BuGn") +
+  coord_flip() +         
+  theme_minimal() +
+  labs(x = "Country of Bean Origin", 
+       y = "Rating",
+       title = "Average Chocolate Rating by Country of Bean Origin")
+```
+
+Average chocolate ratings vary slightly by country of Bean origin but the narrow range of values suggests minimal differences in quality across countries. Next, we should explore whether differences across company manufacturers play a larger role in explaining variation in chocolate ratings.
+
+**Graph #3**
+
+```{r}
+manufacturername<- chocolate |>
+  group_by(company_manufacturer) |>
+  filter(n() > 15) |>
+  mutate(avg_rating = mean(rating))
+```
+
+```{r}
+ggplot(manufacturername) +
+  geom_boxplot( aes(x = reorder(company_manufacturer, avg_rating), y = rating, fill = avg_rating)) + 
+  scale_fill_distiller(name= "Average Rating", palette="YlOrBr") +
+  coord_flip() +         
+  theme_minimal() +
+  labs(x = "Company Manufacturer Name", 
+       y = "Rating",
+       title = "Average Chocolate Rating by Manufacturer")
+```
+
+This graph shows that average chocolate ratings vary more across manufacturers than across countries of bean origin and company location.
+
+Top-performing manufacturers are those near the top of the ranking, such as Soma, Arete, Smooth Chocolator, Domori and Dick Taylor. These companies exhibit higher average ratings and tight interquartile ranges suggesting consistently well rated products.
+
+In contrast, lower performing manufacturers, such as Hotel Chocolat, Artisan du Chocolat and Mast Brothers tend to have lower average ratings. This indicates either lower typical ratings or greater variability across their chocolate offerings.
+
+**Conclusion:** In this analysis, average ratings and boxplots provide insight into broad patterns but results may be influenced by unequal sample sizes, subjective rating scales and unobserved prodcuct characteristics. If additional time were available, the analysis could be more focused on ingredient composition, chocolate characteristics and cocoa percentage. These attributes may help explain variation in ratings beyond geography and manufacturer identity. They may also help clarify whether observed differences reflect sourcing , ingredient choices or production expertise.
+
+**Connection to Class ideas:** The visualizations are effective because they use simple bar graph and boxplots to clearly communicate patterns in the data. By eliminating unnecessary visual clutter and focusing on key comparisons, the graphs direct attention to meaningful differences such as differences in average ratings as well as variation in medians, interquartile ranges and outliers.
