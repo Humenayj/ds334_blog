@@ -43,7 +43,7 @@ country_of_bean_origin: Country from which the cocoa beans were sourced.
 
 company_manufacturer: Name of the manufacturer
 
-Question of Interest: What aspects of a chocolate company seem to matter most for average ratings?
+**Question of Interest**: What aspects of a chocolate company seem to matter most for average ratings?
 
 The data originates from Flavors of Cacao and was accessed via the TidyTuesday project: https://github.com/rfordatascience/tidytuesday/blob/main/data/2022/2022-01-18/readme.md
 
