@@ -1,0 +1,141 @@
+---
+title: "Blog Post 1"
+authors: "JJ Humenay"
+date: "2026-02-06"
+categories: [news, code, analysis]
+---
+
+```{r}
+#| message: false
+#| warning: false
+library(tidyverse)
+library(ggplot2)
+library(readr)
+library(stringr)
+library(lubridate)
+library(dplyr)
+```
+
+**Loading data:**
+
+```{r}
+#| message: false
+#| warning: false
+tuesdata <- tidytuesdayR::tt_load('2022-01-18')
+tuesdata <- tidytuesdayR::tt_load(2022, week = 3)
+```
+
+```{r}
+chocolate <- tuesdata$chocolate
+```
+
+**Introduction:**
+
+This analysis uses the the "Chocolate Ratings" dataset from Flavors of Cacao by Georgios and Kelsey. The dataset contains expert evaluations of chocolate bars produced by manufacturers around the world along with information about where the chocolate is made and where the cocoa beans originate.
+
+Each observation in this dataset represents a single chocolate bar review. The dataset includes 2,530 observations across 10 variables. Key variables include:
+
+rating: Expert rating of the chocolate bar on a 1-5 scale.
+
+company_location: Geographic region where the manufacturer is located.
+
+country_of_bean_origin: Country from which the cocoa beans were sourced.
+
+company_manufacturer: Name of the manufacturer
+
+**Question of Interest**: What aspects of a chocolate company seem to matter most for average ratings?
+
+The data originates from Flavors of Cacao and was accessed via the TidyTuesday project: https://github.com/rfordatascience/tidytuesday/blob/main/data/2022/2022-01-18/readme.md
+
+**Graph #1**
+
+Here we can investigate to see if the manufacturing company location has an effect on the rating of the chocolate. We are using filter to include company locations with more than 10 reviews.
+
+Does the country where a chocolate manufacturer is located influence its average chocolate rating?
+
+```{r}
+chocolate_avg <- chocolate |>
+  group_by(company_location) |>
+  filter(n() > 10) |>
+  summarise(avg_rating = mean(rating)) |>
+  mutate(company_location = fct_reorder(company_location, avg_rating))
+
+ggplot(data=chocolate_avg, aes(x = company_location, y = avg_rating, fill = avg_rating)) +
+  geom_col() +  
+  scale_fill_viridis_c(name = "Average Rating") +
+  coord_flip() +         
+  theme_minimal() +
+  labs(
+    x = "Company Location", 
+    y = "Rating",
+    title = "Average Chocolate Rating by Company Location"
+  )
+```
+
+We can see that average chocolate ratings vary slightly by company location with Vietnam ,Australia and several European countries showing higher ratings. However, the narrow spread in averages suggests that chocolate quality may be more influenced by other factors.
+
+
+**Graph #2**
+
+Now, does the country where cocoa beans are sourced affect average chocolate ratings? ?
+
+```{r}
+ beanchocavg <- chocolate |>
+  group_by(country_of_bean_origin) |>
+  filter(n() > 10) |>
+  mutate(avg_rating = mean(rating)) 
+```
+
+```{r}
+ggplot(beanchocavg) +
+  geom_boxplot( aes(x = fct_reorder(country_of_bean_origin, avg_rating), y = rating, fill = avg_rating)) + 
+  scale_fill_distiller(name= "Average Rating", palette = "BuGn") +
+  coord_flip() +         
+  theme_minimal() +
+  labs(x = "Country of Bean Origin", 
+       y = "Rating",
+       title = "Average Chocolate Rating by Country of Bean Origin")
+```
+
+Average chocolate ratings vary slightly by country of Bean origin but the narrow range of values suggests minimal differences in quality across countries. Next, we should explore whether differences across company manufacturers play a larger role in explaining variation in chocolate ratings.
+
+
+**Graph #3**
+
+Lastly, does the chocolate manufacturer have an effect on average chocolate ratings?
+
+```{r}
+manufacturernames <- chocolate |>
+  group_by(company_manufacturer) |>
+  filter(n() > 15) |>
+  mutate(avg_rating = mean(rating))
+```
+
+
+```{r}
+ggplot(data=manufacturernames,
+  aes(x = fct_reorder(company_manufacturer, avg_rating),
+    y = rating)
+) +
+  geom_point() +
+  geom_point(
+    aes(x=company_manufacturer,y = avg_rating),
+    colour = "hotpink") +
+  coord_flip() +
+  theme_minimal() +
+  labs(
+    x = "Company Manufacturer Name",
+    y = "Rating",
+    title = "Average Chocolate Rating by Manufacturer"
+  )
+```
+This graph shows that average chocolate ratings vary more across manufacturers than across countries of bean origin and company location. Each black dot represents one individual chocolate rating while the pink dot represents the average per manufacturer. There are also many overlapping black dots because many chocolate bars have the same rating.
+
+Top-performing manufacturers are those near the top of the ranking, such as Soma, Arete, Smooth Chocolator, Domori and Dick Taylor. These companies exhibit higher average ratings suggesting consistently well rated products.
+
+In contrast, lower performing manufacturers, such as Hotel Chocolat, Artisan du Chocolat and Mast Brothers tend to have lower average ratings. This indicates either lower typical ratings or greater variability across their chocolate offerings.
+
+
+**Conclusion:** In this analysis, average ratings in these graphs provided insight into broad patterns but results may be influenced by unequal sample sizes, subjective rating scales and unobserved product characteristics. If additional time were available, the analysis could be more focused on ingredient composition, chocolate characteristics and cocoa percentage. These attributes may help explain variation in ratings beyond geography and manufacturer identity. They may also help clarify whether observed differences reflect sourcing , ingredient choices or production decisions.
+
+**Connection to Class ideas:** The visualizations are effective because they use a simple bar graph, scatterplot and boxplot to clearly communicate patterns in the data. By eliminating unnecessary visual clutter and focusing on key comparisons, the graphs direct attention to meaningful differences such as differences in average ratings. The boxplot graph draws attention to more than just average rating but also variation in medians, interquartile ranges and outliers for the boxplot.
