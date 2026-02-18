@@ -1,0 +1,179 @@
+---
+title: "Blog Post 2"
+authors: "JJ Humenay"
+date: "2026-02-18"
+categories: [news, code, analysis]
+---
+
+```{r}
+#| message: false
+#| warning: false
+library(tidyverse)
+library(ggplot2)
+library(readr)
+library(stringr)
+library(lubridate)
+library(dplyr)
+library(forcats)
+```
+
+**Loading in Data:**
+
+```{r}
+# Option 1: tidytuesdayR package 
+## install.packages("tidytuesdayR")
+
+tuesdata <- tidytuesdayR::tt_load('2024-08-06')
+## OR
+tuesdata <- tidytuesdayR::tt_load(2024, week = 32)
+
+olympics <- tuesdata$olympics
+
+
+# Option 2: Read directly from GitHub
+
+olympics <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2024/2024-08-06/olympics.csv')
+
+```
+**Introduction:**
+This analysis uses the “120 Years of Olympic History: Athletes and Results” dataset from Kaggle by RGriffin. The dataset contains historical information about Olympic athletes which includes basic biological data and medal results. It covers the Olympic Games from 1896 to 2016. Each observation represents a single athlete competing in an Olympic event.
+
+For this analysis, I focused on male Winter Olympic Bobsleigh athletes. After watching the Olympics, I became interested in the sport and the type of athletes who compete in it. I used this dataset to explore the most common physical build of male Olympic Bobsleigh athletes and to see whether athletes from certain countries share similar height and weight patterns.
+
+The main variables used are:
+
+team: The country the athlete competed for
+
+sport: The sport competed in (filtered to Bobsleigh)
+
+season: Whether the Games were Winter or Summer (filtered to Winter)
+
+year: The year of the Olympic Games
+
+height: Athlete height(cm)
+
+weight: Athlete weight(Kg)
+
+sex: Athlete Sex
+
+**Question of Interest**:
+What is the most common physical build (height and weight) of male Olympic Winter Bobsleigh athletes?
+
+The data originates from Sports Reference and was compiled into a dataset by RGriffin on Kaggle. It was accessed via the TidyTuesday project: https://github.com/rfordatascience/tidytuesday/blob/main/data/2024/2024-08-06/readme.md
+
+**Graph#1**
+
+First, I investigated the average weight distribution of male Olympic Bobsleigh athletes by country in the Winter Games from 1896 to 2016. We are using stringr to combine variations of team names representing the same country and filtered the dataset to include only countries with at least 20 male athletes who have competed in Bobsleigh.
+
+How does the average weight of all-time male Olympic Winter Bobsleigh athletes vary across countries?
+
+
+```{r}
+Winter <- olympics |>
+  filter(season =="Winter")
+
+Bobsleigh <- Winter |>
+  filter(sport=="Bobsleigh",
+         sex == "M")
+```
+
+```{r}
+olympian_Wgt <- Bobsleigh |> mutate(team = str_remove(team, "-.*")) |> group_by(team) |> filter(n() > 20) |> summarise(avg_wgt = mean(weight, na.rm = TRUE))
+
+olympian_Wgt_clean <- olympian_Wgt |>
+  filter(!is.na(avg_wgt))
+```
+
+```{r}
+ggplot(olympian_Wgt_clean, aes(x = reorder(team, avg_wgt), y = avg_wgt,fill = avg_wgt)) +
+  geom_col() +
+  scale_fill_distiller(palette = "OrRd", name = "Avg Weight")+
+  coord_flip() +
+  theme_minimal() +
+  labs(x = "Country",
+       y = "Weight",
+       title = "Weight Distribution by Country")
+
+
+```
+
+We can see that average weight distribution by country ratings vary with Germany ,Jamaica and Netherlands showing higher average weights. The average weights range approximately from 75 kg to 95 kg which shows a noticeable difference between country. 
+
+However, because this graph includes data from 1896 to 2016, the results may be influenced by historical differences in athlete size. Earlier Olympic athletes may have been lighter on average which could affect the overall country averages and create a wider spread in the data.
+
+To better understand whether this pattern is influenced by older data, the next step is to filter the dataset to include only athletes from the year 2000 and onward.
+
+
+**Graph#2**
+How does the weight distribution of male Olympic Winter Bobsleigh athletes vary by country from the year 2000 and onward?
+
+```{r}
+Bobsleigh_boxplot <- Bobsleigh |>
+  filter(year > 2000, !is.na(weight)) |>
+  mutate(team = str_remove(team, "-.*")) |>
+  group_by(team) |>
+  filter(n() > 20) |>
+mutate(avg_wgt = mean(weight))
+```
+
+
+```{r}
+ggplot(data=Bobsleigh_boxplot,
+       aes(x = fct_reorder(team, avg_wgt), 
+           y = weight,
+           fill = avg_wgt)) +
+  geom_boxplot() +
+  scale_fill_viridis_b(name = "Average Weight") +
+  coord_flip() +
+  theme_minimal() +
+  labs(x = "Country",
+       y = "Weight",
+       title = "Weight Distribution by Country (2000-2016)")
+```
+From the boxplot since 2000, we can see that the average weights now range from about 92 kg to 100 kg which is higher than the all-time averages. This suggests that year may have an effect on weight and modern Bobsleigh athletes tend to be heavier.
+
+Germany and Switzerland have the heaviest athletes with averages close to 100 kg. While Japan has the lowest at around 92 kg. The range between countries is smaller than before which suggests that athlete builds have become more similar in recent years.
+
+**Graph#3**
+For my third graph, I wanted to look at the overall count of athletes at each weight regardless of country.The purpose is to clearly see the most common weight among male Winter Olympic Bobsleigh athletes.
+
+What is the most common weight among male Winter Olympic Bobsleigh athletes since 2000?
+
+```{r}
+Bobsleigh_clean <- Bobsleigh |> filter(!is.na(weight), year >2000) |> 
+  mutate(team = str_remove(team, "-.*")) |> group_by(team) |> filter(n() > 20)
+```
+
+
+```{r}
+ggplot(Bobsleigh_clean, aes(x = weight)) +
+  geom_histogram( fill = "steelblue", color = "black") +
+  theme_minimal() +
+  labs(x = "Weight",
+       y = "Number of Athletes",
+       title = "Distribution of Bobsleigh Athlete Weights (2000-2016)")
+```
+From the histogram, we can see that the most common weight is around 100 kg. There are still some athletes under 80 kg and some over 120 kg but most are close to 100 kg.
+
+**Graph#4**
+For my fourth graph, I looked at height the same way I looked at weight and ignored country to focus on the overall distribution. This helps me see the most common height among male Olympic Winter Bobsleigh athletes as well as understand the most common build in Bobsleigh.
+
+What is the most common height among male Olympic Winter Bobsleigh athletes since 2000?
+
+```{r}
+ggplot(Bobsleigh_clean, aes(x = height)) +
+  geom_density(fill = "purple") +
+  theme_minimal() +
+  labs(x = "Height",
+       y = "Density",
+       title = "Distribution of Bobsleigh Athlete Heights (2000-2016)")
+```
+The results show that the highest concentration of Bobsleigh athletes since 2000 is around 183 cm which suggests that this appears to be the most common height among competitors from 2000-2016.
+
+**Conclusion:**
+In this analysis, looking at weight and height helped show the typical build of male Olympic Winter Bobsleigh athletes from the year 2000 to the year 2016. The graphs show that modern athletes are generally heavier than athletes in earlier years. The most common weights were around 100 kg and the most common height around 183 cm. Recent data suggests that athlete builds have become more similar over time.
+
+However, the results may be affected by differences in country participation, missing data and changes in training or competition over time. If I had more time, I could look at specific roles in Bobsleigh or compare body build to performance results to see if certain builds are linked to greater success.
+
+**Connection to Class ideas:**
+The visualizations are effective because they use a bar graph, boxplot, histogram and density plot to clearly show patterns in the data. The bar graph compares average weight by country while the boxplot shows the spread, medians and outliers. The histogram and density plot help show the overall distribution which makes it easy to see the most common weight (around 100 kg) and height (around 183 cm). Together, these graphs connect to class ideas about using different types of visualizations to better understand patterns and variation in the data.
