@@ -1,5 +1,5 @@
 ---
-title: "About"
+title: "About J.J. Humenay"
 image: profile.jpg
 about:
   template: jolla
@@ -13,7 +13,6 @@ about:
     - icon: github
       text: Github
       href: https://github.com
-
 ---
 
-About this blog
+Hello my name is J.J. Humenay and I am a senior at St. Lawrence University majoring in Economics with a minor in Statistics. This blog was created to showcase my work in STAT 334.

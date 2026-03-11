@@ -1,8 +1,8 @@
 ---
-title: "Blog Post 1"
+title: "Does Manufacturer Identity affect Average Chocolate Ratings?"
 authors: "JJ Humenay"
 date: "2026-02-06"
-categories: [news, code, analysis]
+categories: [analysis]
 ---
 
 ```{r}
@@ -21,13 +21,10 @@ library(dplyr)
 ```{r}
 #| message: false
 #| warning: false
-tuesdata <- tidytuesdayR::tt_load('2022-01-18')
-tuesdata <- tidytuesdayR::tt_load(2022, week = 3)
+
+chocolate <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2022/2022-01-18/chocolate.csv')
 ```
 
-```{r}
-chocolate <- tuesdata$chocolate
-```
 
 **Introduction:**
 
