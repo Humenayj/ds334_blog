@@ -259,25 +259,3 @@ Lastly, some countries may have missing or inconsistent data across the years wh
 ### Future Research:
 
 As mentioned previously, given more time, I would further explore specific countries or regions to better understand how their freedom scores change over time. This could help highlight patterns such as which countries are consistently improving or declining. I could also compare countries within the same region to see how their trends differ and identify any unusual patterns in the data.
-**Graph #2** More specifically for 2020, What is the distribution of Civil Liberties by Freedom Status(Not Free, Partly Free, Free)?
-
-```{r}
-ggplot(data=freedom_2020, aes(x = CL, fill = Status))   +
-  geom_density(alpha = 0.6) +
-   scale_fill_viridis_d() +
-  labs(
-    title = "Distribution of Civil Liberties by Freedom Status (2020)",
-    x = "Civil Liberties Score",
-    y = "Density"
-  ) +
-  theme_minimal()
-```
-
-**Interpretation:**
-
-From this plot, we can see clear differences in Civil Liberties scoresacross the three freedom statuses in 2020. Not Free countries are mostly concentrated at higher scores with many around 6 and ranging from about 4 to 7. In contrast, Free countries are concentrated at the lowest scores, mainly around 1 and ranging from about 1 to 4. Partly Free countries fall in between, showing a wider spread across the middle values.
-
-A density plot works well here because it shows the overall distribution of scores rather than just counts. This makes it easier to see where most countries are concentrated and how much overlap exists between the groups.
-
-This visualization is also useful because it sets up a direct comparison for the next plot. By understanding how Civil Liberties are distributed across statuses, we can now compare these patterns to Political Rights and see whether similar trends appear between the two variables.
-
