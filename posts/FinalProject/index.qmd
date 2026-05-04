@@ -280,3 +280,4 @@ From this plot, we can see clear differences in Civil Liberties scoresacross the
 A density plot works well here because it shows the overall distribution of scores rather than just counts. This makes it easier to see where most countries are concentrated and how much overlap exists between the groups.
 
 This visualization is also useful because it sets up a direct comparison for the next plot. By understanding how Civil Liberties are distributed across statuses, we can now compare these patterns to Political Rights and see whether similar trends appear between the two variables.
+
